@@ -1,0 +1,57 @@
+{
+  "name": "n8n-nodes-condoc",
+  "version": "0.1.1",
+  "description": "n8n community node for ConDoc — a multi-tenant document processing and OCR platform. Automate document uploads, OCR extraction, project management, and more with 21 API operations.",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "condoc",
+    "ocr",
+    "document-processing",
+    "thai",
+    "automation"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Pi R SQUARE Co., Ltd.",
+    "email": "dev@pirsquare.net",
+    "url": "https://condoc.ai"
+  },
+  "homepage": "https://condoc.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pi-R-SQUARE-Co-ltd/condoc-platform",
+    "directory": "packages/n8n-nodes-condoc"
+  },
+  "main": "dist/nodes/ConDoc/ConDoc.node.js",
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/ConDocApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/ConDoc/ConDoc.node.js"
+    ]
+  },
+  "scripts": {
+    "build": "tsc && copyfiles \"nodes/**/*.json\" \"nodes/**/*.png\" dist/",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "copyfiles": "^2.4.1",
+    "eslint": "^8.56.0",
+    "n8n-workflow": "^1.30.0",
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": ">=1.0.0"
+  }
+}

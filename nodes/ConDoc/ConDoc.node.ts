@@ -237,13 +237,13 @@ export class ConDoc implements INodeType {
 
 				// Normalize output
 				if (Array.isArray(responseData)) {
-					returnData.push(...responseData.map((item) => ({ json: item })));
+					returnData.push(...responseData.map((item) => ({ json: item, pairedItem: { item: i } })));
 				} else if (responseData !== undefined) {
-					returnData.push({ json: responseData });
+					returnData.push({ json: responseData, pairedItem: { item: i } });
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ json: { error: (error as Error).message } });
+					returnData.push({ json: { error: (error as Error).message }, pairedItem: { item: i } });
 					continue;
 				}
 				throw error;

@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-condoc",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "n8n community node for ConDoc — a multi-tenant document processing and OCR platform. Automate document uploads, OCR extraction, project management, and more with 21 API operations.",
   "keywords": [
     "n8n-community-node-package",
@@ -20,8 +20,7 @@
   "homepage": "https://condoc.ai",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Pi-R-SQUARE-Co-ltd/condoc-platform",
-    "directory": "packages/n8n-nodes-condoc"
+    "url": "https://github.com/Pi-R-SQUARE-Co-ltd/n8n-nodes-condoc"
   },
   "main": "dist/nodes/ConDoc/ConDoc.node.js",
   "n8n": {

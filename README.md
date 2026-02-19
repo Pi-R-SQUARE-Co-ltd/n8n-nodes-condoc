@@ -56,7 +56,7 @@ This node uses API Key authentication via the `X-API-Key` header.
 
 1. In ConDoc, go to your workspace settings and create an API key
 2. In n8n, create a new **ConDoc API** credential
-3. Enter your **Base URL** (e.g., `https://app.condoc.ai`) and **API Key**
+3. Enter your **Base URL** (e.g., `https://api.condoc.ai`) and **API Key**
 
 The credential will be automatically tested against the ConDoc API.
 

@@ -1,6 +1,6 @@
 # n8n-nodes-condoc
 
-![ConDoc](https://condoc.ai/assets/logo.png)
+![ConDoc](nodes/ConDoc/condoc.png)
 
 This is an n8n community node for the [ConDoc](https://condoc.ai) platform — a multi-tenant document processing and OCR solution built for Thai businesses.
 

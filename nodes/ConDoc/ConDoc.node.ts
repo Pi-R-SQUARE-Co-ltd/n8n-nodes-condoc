@@ -230,16 +230,11 @@ export class ConDoc implements INodeType {
 							code: this.getNodeParameter('code', i) as string,
 						};
 						const description = this.getNodeParameter('description', i) as string;
-						const schemaJson = this.getNodeParameter('schemaJson', i) as string;
 						if (description) body.description = description;
-						if (schemaJson) {
-							body.schemaJson = typeof schemaJson === 'string' ? JSON.parse(schemaJson) : schemaJson;
-						} else {
-							const schemaFields = this.getNodeParameter('schemaFields', i) as any;
-							const built = buildJsonSchema(schemaFields);
-							if (Object.keys(built).length > 0) {
-								body.schemaJson = built;
-							}
+						const schemaFields = this.getNodeParameter('schemaFields', i) as any;
+						const built = buildJsonSchema(schemaFields);
+						if (Object.keys(built).length > 0) {
+							body.schemaJson = built;
 						}
 						responseData = await conDocApiRequest.call(this, 'POST', '/projects', body);
 					} else if (operation === 'list') {
@@ -279,14 +274,8 @@ export class ConDoc implements INodeType {
 					if (operation === 'get') {
 						responseData = await conDocApiRequest.call(this, 'GET', `/projects/${projectId}/definition`);
 					} else if (operation === 'update') {
-						const schemaJson = this.getNodeParameter('schemaJson', i) as string;
-						let schema: any;
-						if (schemaJson) {
-							schema = typeof schemaJson === 'string' ? JSON.parse(schemaJson) : schemaJson;
-						} else {
-							const schemaFields = this.getNodeParameter('schemaFields', i) as any;
-							schema = buildJsonSchema(schemaFields);
-						}
+						const schemaFields = this.getNodeParameter('schemaFields', i) as any;
+						const schema = buildJsonSchema(schemaFields);
 						responseData = await conDocApiRequest.call(this, 'PATCH', `/projects/${projectId}/definition`, { schemaJson: schema });
 					}
 				}

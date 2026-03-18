@@ -149,14 +149,4 @@ export const projectDefinitionFields: INodeProperties[] = [
 			},
 		],
 	},
-	{
-		displayName: 'Schema JSON (Advanced)',
-		name: 'schemaJson',
-		type: 'json',
-		default: '',
-		displayOptions: {
-			show: { resource: ['projectDefinition'], operation: ['update'] },
-		},
-		description: 'ใช้แทน Schema Fields ด้านบน — สำหรับผู้เชี่ยวชาญที่ต้องการเขียน JSON Schema เอง (ถ้ากรอกทั้ง 2 ช่อง จะใช้ช่องนี้แทน)',
-	},
 ];

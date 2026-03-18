@@ -26,14 +26,12 @@ function buildJsonSchema(schemaFields: { fields?: Array<{
 	fieldName: string;
 	fieldType: string;
 	description?: string;
-	required?: boolean;
 	subFields?: any;
 }> }): Record<string, any> {
 	const fields = schemaFields?.fields || [];
 	if (fields.length === 0) return {};
 
 	const properties: Record<string, any> = {};
-	const requiredFields: string[] = [];
 
 	for (let idx = 0; idx < fields.length; idx++) {
 		const f = fields[idx];
@@ -71,20 +69,13 @@ function buildJsonSchema(schemaFields: { fields?: Array<{
 		}
 		properties[f.fieldName] = prop;
 
-		if (f.required) {
-			requiredFields.push(f.fieldName);
-		}
 	}
 
-	const schema: Record<string, any> = {
+	return {
 		type: 'object',
 		properties,
 		additionalProperties: false,
 	};
-	if (requiredFields.length > 0) {
-		schema.required = requiredFields;
-	}
-	return schema;
 }
 
 export class ConDoc implements INodeType {
@@ -229,9 +220,10 @@ export class ConDoc implements INodeType {
 				// ─── Project ───
 				else if (resource === 'project') {
 					if (operation === 'create') {
+						const code = this.getNodeParameter('code', i) as string;
 						const body: Record<string, any> = {
 							name: this.getNodeParameter('name', i) as string,
-							code: this.getNodeParameter('code', i) as string,
+							code: code || `n8n_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
 						};
 						const description = this.getNodeParameter('description', i) as string;
 						if (description) body.description = description;

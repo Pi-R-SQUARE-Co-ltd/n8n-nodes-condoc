@@ -59,17 +59,6 @@ export const projectFields: INodeProperties[] = [
 		description: 'Project name',
 	},
 	{
-		displayName: 'Code',
-		name: 'code',
-		type: 'string',
-		default: '',
-		required: true,
-		displayOptions: {
-			show: { resource: ['project'], operation: ['create'] },
-		},
-		description: 'Unique project code within workspace',
-	},
-	{
 		displayName: 'Description',
 		name: 'description',
 		type: 'string',
@@ -127,13 +116,6 @@ export const projectFields: INodeProperties[] = [
 						description: 'อธิบายว่า field นี้คืออะไร เช่น "ชื่อบริษัทผู้ซื้อ", "จำนวนเงินรวมทั้งหมด"',
 					},
 					{
-						displayName: 'จำเป็นต้องมี',
-						name: 'required',
-						type: 'boolean',
-						default: false,
-						description: 'Whether this field is required in the extracted data',
-					},
-					{
 						displayName: 'คอลัมน์ในตาราง',
 						name: 'subFields',
 						type: 'fixedCollection',
@@ -180,6 +162,16 @@ export const projectFields: INodeProperties[] = [
 				],
 			},
 		],
+	},
+	{
+		displayName: 'Code (ตั้งเอง)',
+		name: 'code',
+		type: 'string',
+		default: '',
+		displayOptions: {
+			show: { resource: ['project'], operation: ['create'] },
+		},
+		description: 'รหัสโปรเจกต์ — ถ้าไม่กรอก ระบบจะสร้างให้อัตโนมัติ',
 	},
 	// --- Get ---
 	{

@@ -102,13 +102,6 @@ export const projectDefinitionFields: INodeProperties[] = [
 						description: 'อธิบายว่า field นี้คืออะไร เช่น "ชื่อบริษัทผู้ซื้อ", "จำนวนเงินรวมทั้งหมด"',
 					},
 					{
-						displayName: 'จำเป็นต้องมี',
-						name: 'required',
-						type: 'boolean',
-						default: false,
-						description: 'Whether this field is required in the extracted data',
-					},
-					{
 						displayName: 'คอลัมน์ในตาราง',
 						name: 'subFields',
 						type: 'fixedCollection',

@@ -48,23 +48,13 @@ function buildJsonSchema(schemaFields: { fields?: Array<{
 
 		if (typeMap[f.fieldType]) {
 			prop = { ...typeMap[f.fieldType] };
-		} else if (f.fieldType === 'object') {
-			prop = { type: 'object', properties: {}, additionalProperties: false };
-			if (f.subFields) {
-				const sub = typeof f.subFields === 'string' ? JSON.parse(f.subFields) : f.subFields;
-				for (const [key, val] of Object.entries(sub as Record<string, string>)) {
-					const mapped = typeMap[val as string] || { type: val as string };
-					prop.properties[key] = mapped;
-				}
-			}
 		} else if (f.fieldType === 'array') {
 			const itemProps: Record<string, any> = {};
-			if (f.subFields) {
-				const sub = typeof f.subFields === 'string' ? JSON.parse(f.subFields) : f.subFields;
-				for (const [key, val] of Object.entries(sub as Record<string, string>)) {
-					const mapped = typeMap[val as string] || { type: val as string };
-					itemProps[key] = mapped;
-				}
+			const columns = (f.subFields as any)?.columns || [];
+			for (const col of columns) {
+				if (!col.name) continue;
+				const mapped = typeMap[col.type as string] || { type: 'string' };
+				itemProps[col.name] = mapped;
 			}
 			prop = {
 				type: 'array',

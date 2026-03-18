@@ -90,7 +90,6 @@ export const projectDefinitionFields: INodeProperties[] = [
 							{ name: 'ตัวเลข', value: 'number' },
 							{ name: 'วันที่', value: 'date' },
 							{ name: 'อีเมล', value: 'email' },
-							{ name: 'กลุ่มข้อมูล (Object)', value: 'object' },
 							{ name: 'ตาราง (หลายรายการ)', value: 'array' },
 						],
 						description: 'ประเภทของข้อมูลที่ field นี้เก็บ',
@@ -103,11 +102,48 @@ export const projectDefinitionFields: INodeProperties[] = [
 						description: 'Whether this field is required in the extracted data',
 					},
 					{
-						displayName: 'Sub-fields (สำหรับกลุ่มข้อมูล/ตาราง)',
+						displayName: 'คอลัมน์ในตาราง',
 						name: 'subFields',
-						type: 'json',
-						default: '',
-						description: 'สำหรับ กลุ่มข้อมูล หรือ ตาราง — ระบุ field ย่อยเป็น JSON เช่น {"item_name": "string", "quantity": "number"}',
+						type: 'fixedCollection',
+						typeOptions: {
+							multipleValues: true,
+						},
+						default: {},
+						displayOptions: {
+							show: {
+								fieldType: ['array'],
+							},
+						},
+						description: 'กำหนดคอลัมน์ภายในตาราง',
+						options: [
+							{
+								displayName: 'คอลัมน์',
+								name: 'columns',
+								values: [
+									{
+										displayName: 'ชื่อคอลัมน์',
+										name: 'name',
+										type: 'string',
+										default: '',
+										required: true,
+										description: 'ชื่อคอลัมน์ เช่น product_name, quantity',
+									},
+									{
+										displayName: 'ประเภท',
+										name: 'type',
+										type: 'options',
+										default: 'string',
+										options: [
+											{ name: 'ข้อความ', value: 'string' },
+											{ name: 'ตัวเลข', value: 'number' },
+											{ name: 'วันที่', value: 'date' },
+											{ name: 'อีเมล', value: 'email' },
+										],
+										description: 'ประเภทข้อมูลของคอลัมน์นี้',
+									},
+								],
+							},
+						],
 					},
 				],
 			},

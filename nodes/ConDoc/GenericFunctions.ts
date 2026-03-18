@@ -2,8 +2,33 @@ import {
 	IExecuteFunctions,
 	IHttpRequestMethods,
 	IHttpRequestOptions,
+	ILoadOptionsFunctions,
+	INodePropertyOptions,
 	NodeApiError,
 } from 'n8n-workflow';
+
+/**
+ * Fetch projects for the loadOptions dropdown.
+ */
+export async function getProjects(
+	this: ILoadOptionsFunctions,
+): Promise<INodePropertyOptions[]> {
+	const credentials = await this.getCredentials('conDocApi');
+	const baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
+
+	const response = await this.helpers.httpRequest({
+		method: 'GET',
+		url: `${baseUrl}/api/v1/external/projects`,
+		headers: { 'X-API-Key': credentials.apiKey as string },
+		json: true,
+	});
+
+	const projects = response?.data || response || [];
+	return (projects as Array<{ name: string; code: string; id: string }>).map((p) => ({
+		name: `${p.name} (${p.code})`,
+		value: p.id,
+	}));
+}
 
 /**
  * Make an authenticated JSON request to the ConDoc External API.

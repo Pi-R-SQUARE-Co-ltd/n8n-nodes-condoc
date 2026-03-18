@@ -41,14 +41,15 @@ export const ocrFields: INodeProperties[] = [
 		description: 'The name of the binary property containing the file to upload',
 	},
 	{
-		displayName: 'Project ID',
+		displayName: 'Project Name or ID',
 		name: 'projectId',
-		type: 'string',
+		type: 'options',
+		typeOptions: { loadOptionsMethod: 'getProjects' },
 		default: '',
 		displayOptions: {
 			show: { resource: ['ocr'], operation: ['upload'] },
 		},
-		description: 'Project ID (required if API key is workspace-scoped)',
+		description: 'Project ID (required if API key is workspace-scoped). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	// --- Get Job Status ---
 	{

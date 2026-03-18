@@ -36,14 +36,15 @@ export const documentOperations: INodeProperties[] = [
 export const documentFields: INodeProperties[] = [
 	// --- List ---
 	{
-		displayName: 'Project ID',
+		displayName: 'Project Name or ID',
 		name: 'projectId',
-		type: 'string',
+		type: 'options',
+		typeOptions: { loadOptionsMethod: 'getProjects' },
 		default: '',
 		displayOptions: {
 			show: { resource: ['document'], operation: ['list'] },
 		},
-		description: 'Filter by project (required if key is workspace-scoped)',
+		description: 'Filter by project (required if key is workspace-scoped). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Page',

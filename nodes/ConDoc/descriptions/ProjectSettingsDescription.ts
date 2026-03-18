@@ -30,27 +30,29 @@ export const projectSettingsOperations: INodeProperties[] = [
 export const projectSettingsFields: INodeProperties[] = [
 	// --- Get ---
 	{
-		displayName: 'Project ID',
+		displayName: 'Project Name or ID',
 		name: 'projectId',
-		type: 'string',
+		type: 'options',
+		typeOptions: { loadOptionsMethod: 'getProjects' },
 		default: '',
 		required: true,
 		displayOptions: {
 			show: { resource: ['projectSettings'], operation: ['get'] },
 		},
-		description: 'The project ID',
+		description: 'The project ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	// --- Update ---
 	{
-		displayName: 'Project ID',
+		displayName: 'Project Name or ID',
 		name: 'projectId',
-		type: 'string',
+		type: 'options',
+		typeOptions: { loadOptionsMethod: 'getProjects' },
 		default: '',
 		required: true,
 		displayOptions: {
 			show: { resource: ['projectSettings'], operation: ['update'] },
 		},
-		description: 'The project ID',
+		description: 'The project ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Settings JSON',

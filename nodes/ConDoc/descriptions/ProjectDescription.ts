@@ -91,27 +91,29 @@ export const projectFields: INodeProperties[] = [
 	},
 	// --- Get ---
 	{
-		displayName: 'Project ID',
+		displayName: 'Project Name or ID',
 		name: 'projectId',
-		type: 'string',
+		type: 'options',
+		typeOptions: { loadOptionsMethod: 'getProjects' },
 		default: '',
 		required: true,
 		displayOptions: {
 			show: { resource: ['project'], operation: ['get'] },
 		},
-		description: 'The project ID',
+		description: 'The project ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	// --- Update ---
 	{
-		displayName: 'Project ID',
+		displayName: 'Project Name or ID',
 		name: 'projectId',
-		type: 'string',
+		type: 'options',
+		typeOptions: { loadOptionsMethod: 'getProjects' },
 		default: '',
 		required: true,
 		displayOptions: {
 			show: { resource: ['project'], operation: ['update'] },
 		},
-		description: 'The project ID to update',
+		description: 'The project ID to update. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Name',
@@ -135,14 +137,15 @@ export const projectFields: INodeProperties[] = [
 	},
 	// --- Delete ---
 	{
-		displayName: 'Project ID',
+		displayName: 'Project Name or ID',
 		name: 'projectId',
-		type: 'string',
+		type: 'options',
+		typeOptions: { loadOptionsMethod: 'getProjects' },
 		default: '',
 		required: true,
 		displayOptions: {
 			show: { resource: ['project'], operation: ['delete'] },
 		},
-		description: 'The project ID to delete',
+		description: 'The project ID to delete. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 ];

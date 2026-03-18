@@ -19,6 +19,80 @@ import { projectDefinitionOperations, projectDefinitionFields } from './descript
 import { projectFixedDataOperations, projectFixedDataFields } from './descriptions/ProjectFixedDataDescription';
 import { projectFieldMappingOperations, projectFieldMappingFields } from './descriptions/ProjectFieldMappingDescription';
 
+/**
+ * Convert fixedCollection schema fields to JSON Schema format.
+ */
+function buildJsonSchema(schemaFields: { fields?: Array<{
+	fieldName: string;
+	fieldType: string;
+	required?: boolean;
+	subFields?: string;
+}> }): Record<string, any> {
+	const fields = schemaFields?.fields || [];
+	if (fields.length === 0) return {};
+
+	const properties: Record<string, any> = {};
+	const requiredFields: string[] = [];
+
+	for (let idx = 0; idx < fields.length; idx++) {
+		const f = fields[idx];
+		if (!f.fieldName) continue;
+
+		let prop: Record<string, any>;
+		const typeMap: Record<string, any> = {
+			string: { type: 'string' },
+			number: { type: 'number' },
+			date: { type: 'string', format: 'date' },
+			email: { type: 'string', format: 'email' },
+		};
+
+		if (typeMap[f.fieldType]) {
+			prop = { ...typeMap[f.fieldType] };
+		} else if (f.fieldType === 'object') {
+			prop = { type: 'object', properties: {}, additionalProperties: false };
+			if (f.subFields) {
+				const sub = typeof f.subFields === 'string' ? JSON.parse(f.subFields) : f.subFields;
+				for (const [key, val] of Object.entries(sub as Record<string, string>)) {
+					const mapped = typeMap[val as string] || { type: val as string };
+					prop.properties[key] = mapped;
+				}
+			}
+		} else if (f.fieldType === 'array') {
+			const itemProps: Record<string, any> = {};
+			if (f.subFields) {
+				const sub = typeof f.subFields === 'string' ? JSON.parse(f.subFields) : f.subFields;
+				for (const [key, val] of Object.entries(sub as Record<string, string>)) {
+					const mapped = typeMap[val as string] || { type: val as string };
+					itemProps[key] = mapped;
+				}
+			}
+			prop = {
+				type: 'array',
+				items: { type: 'object', properties: itemProps, additionalProperties: false },
+			};
+		} else {
+			prop = { type: 'string' };
+		}
+
+		prop['x-order'] = idx;
+		properties[f.fieldName] = prop;
+
+		if (f.required) {
+			requiredFields.push(f.fieldName);
+		}
+	}
+
+	const schema: Record<string, any> = {
+		type: 'object',
+		properties,
+		additionalProperties: false,
+	};
+	if (requiredFields.length > 0) {
+		schema.required = requiredFields;
+	}
+	return schema;
+}
+
 export class ConDoc implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'ConDoc',
@@ -170,6 +244,12 @@ export class ConDoc implements INodeType {
 						if (description) body.description = description;
 						if (schemaJson) {
 							body.schemaJson = typeof schemaJson === 'string' ? JSON.parse(schemaJson) : schemaJson;
+						} else {
+							const schemaFields = this.getNodeParameter('schemaFields', i) as any;
+							const built = buildJsonSchema(schemaFields);
+							if (Object.keys(built).length > 0) {
+								body.schemaJson = built;
+							}
 						}
 						responseData = await conDocApiRequest.call(this, 'POST', '/projects', body);
 					} else if (operation === 'list') {
@@ -210,10 +290,14 @@ export class ConDoc implements INodeType {
 						responseData = await conDocApiRequest.call(this, 'GET', `/projects/${projectId}/definition`);
 					} else if (operation === 'update') {
 						const schemaJson = this.getNodeParameter('schemaJson', i) as string;
-						const body = {
-							schemaJson: typeof schemaJson === 'string' ? JSON.parse(schemaJson) : schemaJson,
-						};
-						responseData = await conDocApiRequest.call(this, 'PATCH', `/projects/${projectId}/definition`, body);
+						let schema: any;
+						if (schemaJson) {
+							schema = typeof schemaJson === 'string' ? JSON.parse(schemaJson) : schemaJson;
+						} else {
+							const schemaFields = this.getNodeParameter('schemaFields', i) as any;
+							schema = buildJsonSchema(schemaFields);
+						}
+						responseData = await conDocApiRequest.call(this, 'PATCH', `/projects/${projectId}/definition`, { schemaJson: schema });
 					}
 				}
 

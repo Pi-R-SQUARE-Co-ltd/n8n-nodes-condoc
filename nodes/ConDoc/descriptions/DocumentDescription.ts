@@ -70,26 +70,28 @@ export const documentFields: INodeProperties[] = [
 	},
 	// --- Get ---
 	{
-		displayName: 'Document ID',
+		displayName: 'Document Name or ID',
 		name: 'documentId',
-		type: 'string',
+		type: 'options',
+		typeOptions: { loadOptionsMethod: 'getDocuments' },
 		default: '',
 		required: true,
 		displayOptions: {
 			show: { resource: ['document'], operation: ['get'] },
 		},
-		description: 'The document ID',
+		description: 'เลือกเอกสาร หรือระบุ ID ด้วย <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 	},
 	// --- Delete ---
 	{
-		displayName: 'Document ID',
+		displayName: 'Document Name or ID',
 		name: 'documentId',
-		type: 'string',
+		type: 'options',
+		typeOptions: { loadOptionsMethod: 'getDocuments' },
 		default: '',
 		required: true,
 		displayOptions: {
 			show: { resource: ['document'], operation: ['delete'] },
 		},
-		description: 'The document ID to delete',
+		description: 'เลือกเอกสารที่ต้องการลบ หรือระบุ ID ด้วย <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 	},
 ];

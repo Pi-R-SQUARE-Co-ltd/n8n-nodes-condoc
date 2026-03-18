@@ -7,7 +7,7 @@ import {
 	INodeTypeDescription,
 } from 'n8n-workflow';
 
-import { conDocApiRequest, conDocApiFileUpload, getProjects } from './GenericFunctions';
+import { conDocApiRequest, conDocApiFileUpload, getProjects, getDocuments } from './GenericFunctions';
 
 import { ocrOperations, ocrFields } from './descriptions/OcrDescription';
 import { documentOperations, documentFields } from './descriptions/DocumentDescription';
@@ -144,6 +144,9 @@ export class ConDoc implements INodeType {
 		loadOptions: {
 			async getProjects(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				return getProjects.call(this);
+			},
+			async getDocuments(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				return getDocuments.call(this);
 			},
 		},
 	};

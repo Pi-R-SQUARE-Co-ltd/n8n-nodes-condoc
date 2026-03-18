@@ -31,6 +31,29 @@ export async function getProjects(
 }
 
 /**
+ * Fetch documents for the loadOptions dropdown.
+ */
+export async function getDocuments(
+	this: ILoadOptionsFunctions,
+): Promise<INodePropertyOptions[]> {
+	const credentials = await this.getCredentials('conDocApi');
+	const baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
+
+	const response = await this.helpers.httpRequest({
+		method: 'GET',
+		url: `${baseUrl}/api/v1/external/documents?limit=100`,
+		headers: { 'X-API-Key': credentials.apiKey as string },
+		json: true,
+	});
+
+	const docs = response?.data?.data || response?.data || response || [];
+	return (docs as Array<{ id: string; originalFileName?: string; fileName?: string }>).map((d) => ({
+		name: d.originalFileName || d.fileName || d.id,
+		value: d.id,
+	}));
+}
+
+/**
  * Make an authenticated JSON request to the ConDoc External API.
  * Automatically unwraps the `{ success, data, error }` response envelope.
  */

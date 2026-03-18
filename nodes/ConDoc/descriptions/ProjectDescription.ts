@@ -120,6 +120,13 @@ export const projectFields: INodeProperties[] = [
 						description: 'ประเภทของข้อมูลที่ field นี้เก็บ',
 					},
 					{
+						displayName: 'คำอธิบาย',
+						name: 'description',
+						type: 'string',
+						default: '',
+						description: 'อธิบายว่า field นี้คืออะไร เช่น "ชื่อบริษัทผู้ซื้อ", "จำนวนเงินรวมทั้งหมด"',
+					},
+					{
 						displayName: 'จำเป็นต้องมี',
 						name: 'required',
 						type: 'boolean',

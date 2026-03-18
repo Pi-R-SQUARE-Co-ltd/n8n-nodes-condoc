@@ -25,8 +25,9 @@ import { projectFieldMappingOperations, projectFieldMappingFields } from './desc
 function buildJsonSchema(schemaFields: { fields?: Array<{
 	fieldName: string;
 	fieldType: string;
+	description?: string;
 	required?: boolean;
-	subFields?: string;
+	subFields?: any;
 }> }): Record<string, any> {
 	const fields = schemaFields?.fields || [];
 	if (fields.length === 0) return {};
@@ -65,6 +66,9 @@ function buildJsonSchema(schemaFields: { fields?: Array<{
 		}
 
 		prop['x-order'] = idx;
+		if (f.description) {
+			prop.description = f.description;
+		}
 		properties[f.fieldName] = prop;
 
 		if (f.required) {

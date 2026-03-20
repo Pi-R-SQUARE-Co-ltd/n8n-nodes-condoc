@@ -7,7 +7,7 @@ import {
 	INodeTypeDescription,
 } from 'n8n-workflow';
 
-import { conDocApiRequest, conDocApiFileUpload, getProjects, getDocuments } from './GenericFunctions';
+import { conDocApiRequest, conDocApiFileUpload, pollForOcrResult, getProjects, getDocuments } from './GenericFunctions';
 
 import { ocrOperations, ocrFields } from './descriptions/OcrDescription';
 import { documentOperations, documentFields } from './descriptions/DocumentDescription';
@@ -170,6 +170,13 @@ export class ConDoc implements INodeType {
 							i,
 							projectId || undefined,
 						);
+
+						const waitForResult = this.getNodeParameter('waitForResult', i, true) as boolean;
+						if (waitForResult && responseData?.jobId) {
+							const pollInterval = this.getNodeParameter('pollInterval', i, 3) as number;
+							const maxWaitTime = this.getNodeParameter('maxWaitTime', i, 300) as number;
+							responseData = await pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+						}
 					} else if (operation === 'getJobStatus') {
 						const jobId = this.getNodeParameter('jobId', i) as string;
 						responseData = await conDocApiRequest.call(this, 'GET', `/ocr/${jobId}`);

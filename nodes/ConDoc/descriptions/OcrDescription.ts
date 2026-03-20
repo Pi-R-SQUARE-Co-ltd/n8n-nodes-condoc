@@ -51,6 +51,39 @@ export const ocrFields: INodeProperties[] = [
 		},
 		description: 'Project ID (required if API key is workspace-scoped). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
+	// --- Wait for Result (upload only) ---
+	{
+		displayName: 'รอผลลัพธ์ (Wait for Result)',
+		name: 'waitForResult',
+		type: 'boolean',
+		default: true,
+		displayOptions: {
+			show: { resource: ['ocr'], operation: ['upload'] },
+		},
+		description: 'เมื่อเปิด จะรอจนกว่า OCR จะเสร็จแล้วส่งผลลัพธ์กลับ เมื่อปิด จะส่ง jobId กลับทันที',
+	},
+	{
+		displayName: 'ตรวจสอบทุกกี่วินาที (Poll Interval)',
+		name: 'pollInterval',
+		type: 'number',
+		default: 3,
+		typeOptions: { minValue: 1, maxValue: 60 },
+		displayOptions: {
+			show: { resource: ['ocr'], operation: ['upload'], waitForResult: [true] },
+		},
+		description: 'จำนวนวินาทีระหว่างการตรวจสอบสถานะ',
+	},
+	{
+		displayName: 'รอสูงสุด (วินาที)',
+		name: 'maxWaitTime',
+		type: 'number',
+		default: 300,
+		typeOptions: { minValue: 10, maxValue: 600 },
+		displayOptions: {
+			show: { resource: ['ocr'], operation: ['upload'], waitForResult: [true] },
+		},
+		description: 'จำนวนวินาทีสูงสุดที่รอผลลัพธ์ก่อนหมดเวลา (ค่าเริ่มต้น 5 นาที)',
+	},
 	// --- Get Job Status ---
 	{
 		displayName: 'Job ID',

@@ -132,3 +132,36 @@ export async function conDocApiFileUpload(
 
 	return response?.data !== undefined ? response.data : response;
 }
+
+/**
+ * Poll OCR job status until terminal state or timeout.
+ */
+export async function pollForOcrResult(
+	this: IExecuteFunctions,
+	jobId: string,
+	pollIntervalSeconds: number,
+	maxWaitTimeSeconds: number,
+): Promise<any> {
+	const startTime = Date.now();
+	const timeoutMs = maxWaitTimeSeconds * 1000;
+	const intervalMs = pollIntervalSeconds * 1000;
+
+	while (Date.now() - startTime < timeoutMs) {
+		const result = await conDocApiRequest.call(this, 'GET', `/ocr/${jobId}`);
+
+		if (result.status === 'succeeded') {
+			return result;
+		}
+		if (result.status === 'failed') {
+			throw new NodeApiError(this.getNode(), result as any, {
+				message: result.errorMessage || `OCR job ${jobId} failed`,
+			});
+		}
+
+		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+	}
+
+	throw new NodeApiError(this.getNode(), {} as any, {
+		message: `OCR job ${jobId} ไม่เสร็จภายใน ${maxWaitTimeSeconds} วินาที ใช้ "Get Job Status" เพื่อตรวจสอบด้วยตนเอง`,
+	});
+}

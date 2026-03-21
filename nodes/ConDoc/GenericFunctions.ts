@@ -190,12 +190,32 @@ export async function conDocApiSimpleOcrUpload(
 		formData.append('schemaFields', JSON.stringify(schemaFields));
 	}
 
-	const response = await this.helpers.httpRequest({
-		method: 'POST',
-		url: `${baseUrl}/api/v1/external/simple-ocr`,
-		headers: { 'X-API-Key': credentials.apiKey as string },
-		body: formData,
-	});
+	let response: any;
+	try {
+		response = await this.helpers.httpRequest({
+			method: 'POST',
+			url: `${baseUrl}/api/v1/external/simple-ocr`,
+			headers: { 'X-API-Key': credentials.apiKey as string },
+			body: formData,
+		});
+	} catch (error: any) {
+		// Extract meaningful error message from API response
+		const responseData = error?.response?.data || error?.body;
+		if (responseData) {
+			const msg = responseData?.message;
+			if (typeof msg === 'string' && msg.toLowerCase().includes('insufficient')) {
+				throw new NodeApiError(this.getNode(), responseData as any, {
+					message: `เครดิตไม่เพียงพอ (Insufficient credits) — ต้องการ ${responseData.required || '?'} เครดิต แต่เหลือ ${responseData.available || '?'} เครดิต กรุณาเติมเครดิตก่อนใช้งาน`,
+				});
+			}
+			const errorMsg = typeof msg === 'string' ? msg
+				: responseData?.error?.message || responseData?.error || JSON.stringify(responseData);
+			throw new NodeApiError(this.getNode(), responseData as any, {
+				message: `Simple OCR failed: ${errorMsg}`,
+			});
+		}
+		throw error;
+	}
 
 	if (response && response.success === false) {
 		throw new NodeApiError(this.getNode(), response as any, {

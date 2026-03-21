@@ -4,6 +4,10 @@ import { IExecuteFunctions, IHttpRequestMethods, ILoadOptionsFunctions, INodePro
  */
 export declare function getProjects(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]>;
 /**
+ * Fetch documents for the loadOptions dropdown.
+ */
+export declare function getDocuments(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]>;
+/**
  * Make an authenticated JSON request to the ConDoc External API.
  * Automatically unwraps the `{ success, data, error }` response envelope.
  */
@@ -13,3 +17,14 @@ export declare function conDocApiRequest(this: IExecuteFunctions, method: IHttpR
  * Automatically unwraps the response envelope.
  */
 export declare function conDocApiFileUpload(this: IExecuteFunctions, itemIndex: number, projectId?: string): Promise<any>;
+/**
+ * Poll OCR job status until terminal state or timeout.
+ */
+export declare function pollForOcrResult(this: IExecuteFunctions, jobId: string, pollIntervalSeconds: number, maxWaitTimeSeconds: number): Promise<any>;
+/**
+ * Upload file to Simple OCR endpoint with project name + schema fields.
+ */
+export declare function conDocApiSimpleOcrUpload(this: IExecuteFunctions, itemIndex: number, projectName: string, schemaFields: Array<{
+    name: string;
+    description?: string;
+}>): Promise<any>;

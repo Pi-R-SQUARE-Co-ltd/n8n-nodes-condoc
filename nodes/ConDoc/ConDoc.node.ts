@@ -7,7 +7,7 @@ import {
 	INodeTypeDescription,
 } from 'n8n-workflow';
 
-import { conDocApiRequest, conDocApiFileUpload, pollForOcrResult, getProjects, getDocuments } from './GenericFunctions';
+import { conDocApiRequest, conDocApiFileUpload, pollForOcrResult, conDocApiSimpleOcrUpload, getProjects, getDocuments } from './GenericFunctions';
 
 import { ocrOperations, ocrFields } from './descriptions/OcrDescription';
 import { documentOperations, documentFields } from './descriptions/DocumentDescription';
@@ -18,6 +18,7 @@ import { projectSettingsOperations, projectSettingsFields } from './descriptions
 import { projectDefinitionOperations, projectDefinitionFields } from './descriptions/ProjectDefinitionDescription';
 import { projectFixedDataOperations, projectFixedDataFields } from './descriptions/ProjectFixedDataDescription';
 import { projectFieldMappingOperations, projectFieldMappingFields } from './descriptions/ProjectFieldMappingDescription';
+import { simpleOcrOperations, simpleOcrFields } from './descriptions/SimpleOcrDescription';
 
 /**
  * Convert fixedCollection schema fields to JSON Schema format.
@@ -106,7 +107,8 @@ export class ConDoc implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
-					{ name: 'OCR', value: 'ocr' },
+					{ name: 'Simple OCR', value: 'simpleOcr' },
+				{ name: 'OCR', value: 'ocr' },
 					{ name: 'Document', value: 'document' },
 					{ name: 'Credit', value: 'credit' },
 					{ name: 'Usage', value: 'usage' },
@@ -119,6 +121,8 @@ export class ConDoc implements INodeType {
 				default: 'ocr',
 			},
 			// Operations & fields for each resource
+			...simpleOcrOperations,
+			...simpleOcrFields,
 			...ocrOperations,
 			...ocrFields,
 			...documentOperations,
@@ -161,8 +165,32 @@ export class ConDoc implements INodeType {
 			try {
 				let responseData: any;
 
+				// ─── Simple OCR ───
+				if (resource === 'simpleOcr') {
+					if (operation === 'process') {
+						const projectName = this.getNodeParameter('projectName', i) as string;
+						const schemaFieldsRaw = this.getNodeParameter('schemaFields', i) as any;
+						const fields = schemaFieldsRaw?.fields || [];
+
+						// Convert to API format (fieldName → name)
+						const schemaFields = fields.map((f: any) => ({
+							name: f.fieldName,
+							description: f.description || undefined,
+						}));
+
+						responseData = await conDocApiSimpleOcrUpload.call(this, i, projectName, schemaFields);
+
+						const waitForResult = this.getNodeParameter('waitForResult', i, true) as boolean;
+						if (waitForResult && responseData?.jobId) {
+							const pollInterval = this.getNodeParameter('pollInterval', i, 3) as number;
+							const maxWaitTime = this.getNodeParameter('maxWaitTime', i, 300) as number;
+							responseData = await pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+						}
+					}
+				}
+
 				// ─── OCR ───
-				if (resource === 'ocr') {
+				else if (resource === 'ocr') {
 					if (operation === 'upload') {
 						const projectId = this.getNodeParameter('projectId', i) as string;
 						responseData = await conDocApiFileUpload.call(

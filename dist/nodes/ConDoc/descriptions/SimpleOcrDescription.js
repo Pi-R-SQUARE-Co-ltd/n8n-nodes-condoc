@@ -1,0 +1,103 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.simpleOcrFields = exports.simpleOcrOperations = void 0;
+exports.simpleOcrOperations = [
+    {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['simpleOcr'] } },
+        options: [
+            {
+                name: 'Process',
+                value: 'process',
+                description: 'Upload file with auto project creation and OCR processing',
+                action: 'Process file with simple OCR',
+            },
+        ],
+        default: 'process',
+    },
+];
+exports.simpleOcrFields = [
+    // Project Name
+    {
+        displayName: 'ชื่อโปรเจกต์ (Project Name)',
+        name: 'projectName',
+        type: 'string',
+        default: '',
+        required: true,
+        displayOptions: { show: { resource: ['simpleOcr'], operation: ['process'] } },
+        description: 'ชื่อโปรเจกต์ — ถ้ามีอยู่แล้วจะใช้โปรเจกต์เดิม ถ้าไม่มีจะสร้างใหม่',
+    },
+    // Schema Fields — simplified, no fieldType (always string), no subFields
+    {
+        displayName: 'Output ที่ต้องการ',
+        name: 'schemaFields',
+        type: 'fixedCollection',
+        typeOptions: { multipleValues: true, sortable: true },
+        default: {},
+        displayOptions: { show: { resource: ['simpleOcr'], operation: ['process'] } },
+        description: 'กำหนด field ที่ต้องการดึงจากเอกสาร',
+        options: [
+            {
+                displayName: 'Fields',
+                name: 'fields',
+                values: [
+                    {
+                        displayName: 'Name',
+                        name: 'fieldName',
+                        type: 'string',
+                        default: '',
+                        required: true,
+                        description: 'ชื่อ field ที่ต้องการดึง เช่น company_name, tax_id',
+                    },
+                    {
+                        displayName: 'Description',
+                        name: 'description',
+                        type: 'string',
+                        default: '',
+                        description: 'คำอธิบายว่า field นี้คืออะไร เพื่อช่วยให้ OCR เข้าใจบริบท',
+                    },
+                ],
+            },
+        ],
+    },
+    // Binary Property
+    {
+        displayName: 'Binary Property',
+        name: 'binaryPropertyName',
+        type: 'string',
+        default: 'data',
+        required: true,
+        displayOptions: { show: { resource: ['simpleOcr'], operation: ['process'] } },
+        description: 'ชื่อ binary property ที่มีไฟล์',
+    },
+    // Wait for Result
+    {
+        displayName: 'รอผลลัพธ์ (Wait for Result)',
+        name: 'waitForResult',
+        type: 'boolean',
+        default: true,
+        displayOptions: { show: { resource: ['simpleOcr'], operation: ['process'] } },
+        description: 'เมื่อเปิด จะรอจนกว่า OCR จะเสร็จแล้วส่งผลลัพธ์กลับ',
+    },
+    {
+        displayName: 'ตรวจสอบทุกกี่วินาที (Poll Interval)',
+        name: 'pollInterval',
+        type: 'number',
+        default: 3,
+        typeOptions: { minValue: 1, maxValue: 60 },
+        displayOptions: { show: { resource: ['simpleOcr'], operation: ['process'], waitForResult: [true] } },
+        description: 'จำนวนวินาทีระหว่างการตรวจสอบสถานะ',
+    },
+    {
+        displayName: 'รอสูงสุด (วินาที)',
+        name: 'maxWaitTime',
+        type: 'number',
+        default: 300,
+        typeOptions: { minValue: 10, maxValue: 600 },
+        displayOptions: { show: { resource: ['simpleOcr'], operation: ['process'], waitForResult: [true] } },
+        description: 'จำนวนวินาทีสูงสุดที่รอผลลัพธ์',
+    },
+];

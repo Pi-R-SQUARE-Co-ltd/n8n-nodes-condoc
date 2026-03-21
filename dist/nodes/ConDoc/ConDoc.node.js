@@ -11,6 +11,59 @@ const ProjectSettingsDescription_1 = require("./descriptions/ProjectSettingsDesc
 const ProjectDefinitionDescription_1 = require("./descriptions/ProjectDefinitionDescription");
 const ProjectFixedDataDescription_1 = require("./descriptions/ProjectFixedDataDescription");
 const ProjectFieldMappingDescription_1 = require("./descriptions/ProjectFieldMappingDescription");
+const SimpleOcrDescription_1 = require("./descriptions/SimpleOcrDescription");
+/**
+ * Convert fixedCollection schema fields to JSON Schema format.
+ */
+function buildJsonSchema(schemaFields) {
+    var _a;
+    const fields = (schemaFields === null || schemaFields === void 0 ? void 0 : schemaFields.fields) || [];
+    if (fields.length === 0)
+        return {};
+    const properties = {};
+    for (let idx = 0; idx < fields.length; idx++) {
+        const f = fields[idx];
+        if (!f.fieldName)
+            continue;
+        let prop;
+        const typeMap = {
+            string: { type: 'string' },
+            number: { type: 'number' },
+            date: { type: 'string', format: 'date' },
+            email: { type: 'string', format: 'email' },
+        };
+        if (typeMap[f.fieldType]) {
+            prop = { ...typeMap[f.fieldType] };
+        }
+        else if (f.fieldType === 'array') {
+            const itemProps = {};
+            const columns = ((_a = f.subFields) === null || _a === void 0 ? void 0 : _a.columns) || [];
+            for (const col of columns) {
+                if (!col.name)
+                    continue;
+                const mapped = typeMap[col.type] || { type: 'string' };
+                itemProps[col.name] = mapped;
+            }
+            prop = {
+                type: 'array',
+                items: { type: 'object', properties: itemProps, additionalProperties: false },
+            };
+        }
+        else {
+            prop = { type: 'string' };
+        }
+        prop['x-order'] = idx;
+        if (f.description) {
+            prop.description = f.description;
+        }
+        properties[f.fieldName] = prop;
+    }
+    return {
+        type: 'object',
+        properties,
+        additionalProperties: false,
+    };
+}
 class ConDoc {
     constructor() {
         this.description = {
@@ -40,6 +93,7 @@ class ConDoc {
                     type: 'options',
                     noDataExpression: true,
                     options: [
+                        { name: 'Simple OCR', value: 'simpleOcr' },
                         { name: 'OCR', value: 'ocr' },
                         { name: 'Document', value: 'document' },
                         { name: 'Credit', value: 'credit' },
@@ -53,6 +107,8 @@ class ConDoc {
                     default: 'ocr',
                 },
                 // Operations & fields for each resource
+                ...SimpleOcrDescription_1.simpleOcrOperations,
+                ...SimpleOcrDescription_1.simpleOcrFields,
                 ...OcrDescription_1.ocrOperations,
                 ...OcrDescription_1.ocrFields,
                 ...DocumentDescription_1.documentOperations,
@@ -78,6 +134,9 @@ class ConDoc {
                 async getProjects() {
                     return GenericFunctions_1.getProjects.call(this);
                 },
+                async getDocuments() {
+                    return GenericFunctions_1.getDocuments.call(this);
+                },
             },
         };
     }
@@ -89,11 +148,37 @@ class ConDoc {
         for (let i = 0; i < items.length; i++) {
             try {
                 let responseData;
+                // ─── Simple OCR ───
+                if (resource === 'simpleOcr') {
+                    if (operation === 'process') {
+                        const projectName = this.getNodeParameter('projectName', i);
+                        const schemaFieldsRaw = this.getNodeParameter('schemaFields', i);
+                        const fields = (schemaFieldsRaw === null || schemaFieldsRaw === void 0 ? void 0 : schemaFieldsRaw.fields) || [];
+                        // Convert to API format (fieldName → name)
+                        const schemaFields = fields.map((f) => ({
+                            name: f.fieldName,
+                            description: f.description || undefined,
+                        }));
+                        responseData = await GenericFunctions_1.conDocApiSimpleOcrUpload.call(this, i, projectName, schemaFields);
+                        const waitForResult = this.getNodeParameter('waitForResult', i, true);
+                        if (waitForResult && (responseData === null || responseData === void 0 ? void 0 : responseData.jobId)) {
+                            const pollInterval = this.getNodeParameter('pollInterval', i, 3);
+                            const maxWaitTime = this.getNodeParameter('maxWaitTime', i, 300);
+                            responseData = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+                        }
+                    }
+                }
                 // ─── OCR ───
-                if (resource === 'ocr') {
+                else if (resource === 'ocr') {
                     if (operation === 'upload') {
                         const projectId = this.getNodeParameter('projectId', i);
                         responseData = await GenericFunctions_1.conDocApiFileUpload.call(this, i, projectId || undefined);
+                        const waitForResult = this.getNodeParameter('waitForResult', i, true);
+                        if (waitForResult && (responseData === null || responseData === void 0 ? void 0 : responseData.jobId)) {
+                            const pollInterval = this.getNodeParameter('pollInterval', i, 3);
+                            const maxWaitTime = this.getNodeParameter('maxWaitTime', i, 300);
+                            responseData = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+                        }
                     }
                     else if (operation === 'getJobStatus') {
                         const jobId = this.getNodeParameter('jobId', i);
@@ -153,16 +238,18 @@ class ConDoc {
                 // ─── Project ───
                 else if (resource === 'project') {
                     if (operation === 'create') {
+                        const code = this.getNodeParameter('code', i);
                         const body = {
                             name: this.getNodeParameter('name', i),
-                            code: this.getNodeParameter('code', i),
+                            code: code || `n8n_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
                         };
                         const description = this.getNodeParameter('description', i);
-                        const schemaJson = this.getNodeParameter('schemaJson', i);
                         if (description)
                             body.description = description;
-                        if (schemaJson) {
-                            body.schemaJson = typeof schemaJson === 'string' ? JSON.parse(schemaJson) : schemaJson;
+                        const schemaFields = this.getNodeParameter('schemaFields', i);
+                        const built = buildJsonSchema(schemaFields);
+                        if (Object.keys(built).length > 0) {
+                            body.schemaJson = built;
                         }
                         responseData = await GenericFunctions_1.conDocApiRequest.call(this, 'POST', '/projects', body);
                     }
@@ -208,11 +295,9 @@ class ConDoc {
                         responseData = await GenericFunctions_1.conDocApiRequest.call(this, 'GET', `/projects/${projectId}/definition`);
                     }
                     else if (operation === 'update') {
-                        const schemaJson = this.getNodeParameter('schemaJson', i);
-                        const body = {
-                            schemaJson: typeof schemaJson === 'string' ? JSON.parse(schemaJson) : schemaJson,
-                        };
-                        responseData = await GenericFunctions_1.conDocApiRequest.call(this, 'PATCH', `/projects/${projectId}/definition`, body);
+                        const schemaFields = this.getNodeParameter('schemaFields', i);
+                        const schema = buildJsonSchema(schemaFields);
+                        responseData = await GenericFunctions_1.conDocApiRequest.call(this, 'PATCH', `/projects/${projectId}/definition`, { schemaJson: schema });
                     }
                 }
                 // ─── Project Fixed Data ───

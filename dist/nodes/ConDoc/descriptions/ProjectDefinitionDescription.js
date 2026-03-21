@@ -55,14 +55,98 @@ exports.projectDefinitionFields = [
         description: 'The project ID. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
     },
     {
-        displayName: 'Schema JSON',
-        name: 'schemaJson',
-        type: 'json',
-        default: '{}',
-        required: true,
+        displayName: 'Schema Fields',
+        name: 'schemaFields',
+        type: 'fixedCollection',
+        typeOptions: {
+            multipleValues: true,
+            sortable: true,
+        },
+        default: {},
         displayOptions: {
             show: { resource: ['projectDefinition'], operation: ['update'] },
         },
-        description: 'The schema definition object',
+        description: 'กำหนด field ที่ต้องการดึงจากเอกสาร (ระบบจะแปลงเป็น JSON Schema ให้อัตโนมัติ)',
+        options: [
+            {
+                displayName: 'Fields',
+                name: 'fields',
+                values: [
+                    {
+                        displayName: 'ชื่อ Field',
+                        name: 'fieldName',
+                        type: 'string',
+                        default: '',
+                        required: true,
+                        description: 'ชื่อ field ที่ต้องการดึง เช่น company_name, tax_id',
+                    },
+                    {
+                        displayName: 'ประเภทข้อมูล',
+                        name: 'fieldType',
+                        type: 'options',
+                        default: 'string',
+                        options: [
+                            { name: 'ข้อความ', value: 'string' },
+                            { name: 'ตัวเลข', value: 'number' },
+                            { name: 'วันที่', value: 'date' },
+                            { name: 'อีเมล', value: 'email' },
+                            { name: 'ตาราง (หลายรายการ)', value: 'array' },
+                        ],
+                        description: 'ประเภทของข้อมูลที่ field นี้เก็บ',
+                    },
+                    {
+                        displayName: 'คำอธิบาย',
+                        name: 'description',
+                        type: 'string',
+                        default: '',
+                        description: 'อธิบายว่า field นี้คืออะไร เช่น "ชื่อบริษัทผู้ซื้อ", "จำนวนเงินรวมทั้งหมด"',
+                    },
+                    {
+                        displayName: 'คอลัมน์ในตาราง',
+                        name: 'subFields',
+                        type: 'fixedCollection',
+                        typeOptions: {
+                            multipleValues: true,
+                        },
+                        default: {},
+                        displayOptions: {
+                            show: {
+                                fieldType: ['array'],
+                            },
+                        },
+                        description: 'กำหนดคอลัมน์ภายในตาราง',
+                        options: [
+                            {
+                                displayName: 'คอลัมน์',
+                                name: 'columns',
+                                values: [
+                                    {
+                                        displayName: 'ชื่อคอลัมน์',
+                                        name: 'name',
+                                        type: 'string',
+                                        default: '',
+                                        required: true,
+                                        description: 'ชื่อคอลัมน์ เช่น product_name, quantity',
+                                    },
+                                    {
+                                        displayName: 'ประเภท',
+                                        name: 'type',
+                                        type: 'options',
+                                        default: 'string',
+                                        options: [
+                                            { name: 'ข้อความ', value: 'string' },
+                                            { name: 'ตัวเลข', value: 'number' },
+                                            { name: 'วันที่', value: 'date' },
+                                            { name: 'อีเมล', value: 'email' },
+                                        ],
+                                        description: 'ประเภทข้อมูลของคอลัมน์นี้',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
     },
 ];

@@ -4,6 +4,7 @@ export declare class ConDoc implements INodeType {
     methods: {
         loadOptions: {
             getProjects(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]>;
+            getDocuments(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]>;
         };
     };
     execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]>;

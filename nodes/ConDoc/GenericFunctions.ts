@@ -165,3 +165,43 @@ export async function pollForOcrResult(
 		message: `OCR job ${jobId} ไม่เสร็จภายใน ${maxWaitTimeSeconds} วินาที ใช้ "Get Job Status" เพื่อตรวจสอบด้วยตนเอง`,
 	});
 }
+
+/**
+ * Upload file to Simple OCR endpoint with project name + schema fields.
+ */
+export async function conDocApiSimpleOcrUpload(
+	this: IExecuteFunctions,
+	itemIndex: number,
+	projectName: string,
+	schemaFields: Array<{ name: string; description?: string }>,
+): Promise<any> {
+	const credentials = await this.getCredentials('conDocApi');
+	const baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
+
+	const binaryPropertyName = this.getNodeParameter('binaryPropertyName', itemIndex) as string;
+	const binaryData = this.helpers.assertBinaryData(itemIndex, binaryPropertyName);
+	const buffer = await this.helpers.getBinaryDataBuffer(itemIndex, binaryPropertyName);
+
+	const formData = new FormData();
+	formData.append('file', new Blob([buffer], { type: binaryData.mimeType }), binaryData.fileName || 'upload');
+	formData.append('projectName', projectName);
+
+	if (schemaFields.length > 0) {
+		formData.append('schemaFields', JSON.stringify(schemaFields));
+	}
+
+	const response = await this.helpers.httpRequest({
+		method: 'POST',
+		url: `${baseUrl}/api/v1/external/simple-ocr`,
+		headers: { 'X-API-Key': credentials.apiKey as string },
+		body: formData,
+	});
+
+	if (response && response.success === false) {
+		throw new NodeApiError(this.getNode(), response as any, {
+			message: response.error?.message || 'Simple OCR upload failed',
+		});
+	}
+
+	return response?.data !== undefined ? response.data : response;
+}

@@ -165,7 +165,7 @@ class ConDoc {
                                 subFields: f.fieldType === 'array'
                                     ? (((_a = f.subFields) === null || _a === void 0 ? void 0 : _a.columns) || []).map((col) => ({
                                         name: col.name,
-                                        type: col.type || 'string',
+                                        description: col.description || undefined,
                                     }))
                                     : undefined,
                             });
@@ -173,9 +173,7 @@ class ConDoc {
                         responseData = await GenericFunctions_1.conDocApiSimpleOcrUpload.call(this, i, projectName, schemaFields);
                         const waitForResult = this.getNodeParameter('waitForResult', i, true);
                         if (waitForResult && (responseData === null || responseData === void 0 ? void 0 : responseData.jobId)) {
-                            const pollInterval = this.getNodeParameter('pollInterval', i, 3);
-                            const maxWaitTime = this.getNodeParameter('maxWaitTime', i, 300);
-                            const pollResult = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+                            const pollResult = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, 3, 300);
                             // Extract only documents array for cleaner output
                             responseData = ((_b = (_a = pollResult === null || pollResult === void 0 ? void 0 : pollResult.results) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.documents) || pollResult;
                         }

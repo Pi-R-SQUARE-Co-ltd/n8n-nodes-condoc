@@ -180,7 +180,7 @@ export class ConDoc implements INodeType {
 							subFields: f.fieldType === 'array'
 								? (f.subFields?.columns || []).map((col: any) => ({
 									name: col.name,
-									type: col.type || 'string',
+									description: col.description || undefined,
 								}))
 								: undefined,
 						}));
@@ -189,9 +189,7 @@ export class ConDoc implements INodeType {
 
 						const waitForResult = this.getNodeParameter('waitForResult', i, true) as boolean;
 						if (waitForResult && responseData?.jobId) {
-							const pollInterval = this.getNodeParameter('pollInterval', i, 3) as number;
-							const maxWaitTime = this.getNodeParameter('maxWaitTime', i, 300) as number;
-							const pollResult = await pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+							const pollResult = await pollForOcrResult.call(this, responseData.jobId, 3, 300);
 							// Extract only documents array for cleaner output
 							responseData = pollResult?.results?.data?.documents || pollResult;
 						}

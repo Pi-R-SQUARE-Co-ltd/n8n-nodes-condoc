@@ -190,8 +190,9 @@ export class ConDoc implements INodeType {
 						const waitForResult = this.getNodeParameter('waitForResult', i, true) as boolean;
 						if (waitForResult && responseData?.jobId) {
 							const pollResult = await pollForOcrResult.call(this, responseData.jobId, 3, 300);
-							// Extract only documents array for cleaner output
-							responseData = pollResult?.results?.data?.documents || pollResult;
+							// Extract only ocrData from first document for clean output
+							const docs = pollResult?.results?.data?.documents;
+							responseData = docs?.[0]?.ocrData || pollResult;
 						}
 					}
 				}

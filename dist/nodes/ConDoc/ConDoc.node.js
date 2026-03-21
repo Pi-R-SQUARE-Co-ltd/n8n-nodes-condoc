@@ -141,7 +141,7 @@ class ConDoc {
         };
     }
     async execute() {
-        var _a, _b;
+        var _a, _b, _c;
         const items = this.getInputData();
         const returnData = [];
         const resource = this.getNodeParameter('resource', 0);
@@ -174,8 +174,9 @@ class ConDoc {
                         const waitForResult = this.getNodeParameter('waitForResult', i, true);
                         if (waitForResult && (responseData === null || responseData === void 0 ? void 0 : responseData.jobId)) {
                             const pollResult = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, 3, 300);
-                            // Extract only documents array for cleaner output
-                            responseData = ((_b = (_a = pollResult === null || pollResult === void 0 ? void 0 : pollResult.results) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.documents) || pollResult;
+                            // Extract only ocrData from first document for clean output
+                            const docs = (_b = (_a = pollResult === null || pollResult === void 0 ? void 0 : pollResult.results) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.documents;
+                            responseData = ((_c = docs === null || docs === void 0 ? void 0 : docs[0]) === null || _c === void 0 ? void 0 : _c.ocrData) || pollResult;
                         }
                     }
                 }

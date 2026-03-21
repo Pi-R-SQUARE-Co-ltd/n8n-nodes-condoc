@@ -30,7 +30,7 @@ export const simpleOcrFields: INodeProperties[] = [
 		displayOptions: { show: { resource: ['simpleOcr'], operation: ['process'] } },
 		description: 'ชื่อโปรเจกต์ — ถ้ามีอยู่แล้วจะใช้โปรเจกต์เดิม ถ้าไม่มีจะสร้างใหม่',
 	},
-	// Schema Fields — simplified, no fieldType (always string), no subFields
+	// Schema Fields — supports string and table (array) types
 	{
 		displayName: 'Output ที่ต้องการ',
 		name: 'schemaFields',
@@ -50,7 +50,18 @@ export const simpleOcrFields: INodeProperties[] = [
 						type: 'string',
 						default: '',
 						required: true,
-						description: 'ชื่อ field ที่ต้องการดึง เช่น company_name, tax_id',
+						description: 'ชื่อ field ที่ต้องการดึง เช่น company_name, tax_id, items',
+					},
+					{
+						displayName: 'ประเภท',
+						name: 'fieldType',
+						type: 'options',
+						default: 'string',
+						options: [
+							{ name: 'ข้อความ', value: 'string' },
+							{ name: 'ตาราง (หลายรายการ)', value: 'array' },
+						],
+						description: 'ประเภทของข้อมูล — ข้อความ หรือ ตาราง',
 					},
 					{
 						displayName: 'Description',
@@ -58,6 +69,42 @@ export const simpleOcrFields: INodeProperties[] = [
 						type: 'string',
 						default: '',
 						description: 'คำอธิบายว่า field นี้คืออะไร เพื่อช่วยให้ OCR เข้าใจบริบท',
+					},
+					{
+						displayName: 'คอลัมน์ในตาราง',
+						name: 'subFields',
+						type: 'fixedCollection',
+						typeOptions: { multipleValues: true },
+						default: {},
+						displayOptions: { show: { fieldType: ['array'] } },
+						description: 'กำหนดคอลัมน์ภายในตาราง',
+						options: [
+							{
+								displayName: 'คอลัมน์',
+								name: 'columns',
+								values: [
+									{
+										displayName: 'ชื่อคอลัมน์',
+										name: 'name',
+										type: 'string',
+										default: '',
+										required: true,
+										description: 'ชื่อคอลัมน์ เช่น product_name, quantity',
+									},
+									{
+										displayName: 'ประเภท',
+										name: 'type',
+										type: 'options',
+										default: 'string',
+										options: [
+											{ name: 'ข้อความ', value: 'string' },
+											{ name: 'ตัวเลข', value: 'number' },
+										],
+										description: 'ประเภทข้อมูลของคอลัมน์นี้',
+									},
+								],
+							},
+						],
 					},
 				],
 			},

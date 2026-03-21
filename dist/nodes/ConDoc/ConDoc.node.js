@@ -141,6 +141,7 @@ class ConDoc {
         };
     }
     async execute() {
+        var _a, _b;
         const items = this.getInputData();
         const returnData = [];
         const resource = this.getNodeParameter('resource', 0);
@@ -154,17 +155,29 @@ class ConDoc {
                         const projectName = this.getNodeParameter('projectName', i);
                         const schemaFieldsRaw = this.getNodeParameter('schemaFields', i);
                         const fields = (schemaFieldsRaw === null || schemaFieldsRaw === void 0 ? void 0 : schemaFieldsRaw.fields) || [];
-                        // Convert to API format (fieldName → name)
-                        const schemaFields = fields.map((f) => ({
-                            name: f.fieldName,
-                            description: f.description || undefined,
-                        }));
+                        // Convert to API format (fieldName → name, include fieldType + subFields)
+                        const schemaFields = fields.map((f) => {
+                            var _a;
+                            return ({
+                                name: f.fieldName,
+                                fieldType: f.fieldType || 'string',
+                                description: f.description || undefined,
+                                subFields: f.fieldType === 'array'
+                                    ? (((_a = f.subFields) === null || _a === void 0 ? void 0 : _a.columns) || []).map((col) => ({
+                                        name: col.name,
+                                        type: col.type || 'string',
+                                    }))
+                                    : undefined,
+                            });
+                        });
                         responseData = await GenericFunctions_1.conDocApiSimpleOcrUpload.call(this, i, projectName, schemaFields);
                         const waitForResult = this.getNodeParameter('waitForResult', i, true);
                         if (waitForResult && (responseData === null || responseData === void 0 ? void 0 : responseData.jobId)) {
                             const pollInterval = this.getNodeParameter('pollInterval', i, 3);
                             const maxWaitTime = this.getNodeParameter('maxWaitTime', i, 300);
-                            responseData = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+                            const pollResult = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+                            // Extract only documents array for cleaner output
+                            responseData = ((_b = (_a = pollResult === null || pollResult === void 0 ? void 0 : pollResult.results) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.documents) || pollResult;
                         }
                     }
                 }

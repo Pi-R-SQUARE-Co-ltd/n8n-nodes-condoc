@@ -172,10 +172,17 @@ export class ConDoc implements INodeType {
 						const schemaFieldsRaw = this.getNodeParameter('schemaFields', i) as any;
 						const fields = schemaFieldsRaw?.fields || [];
 
-						// Convert to API format (fieldName → name)
+						// Convert to API format (fieldName → name, include fieldType + subFields)
 						const schemaFields = fields.map((f: any) => ({
 							name: f.fieldName,
+							fieldType: f.fieldType || 'string',
 							description: f.description || undefined,
+							subFields: f.fieldType === 'array'
+								? (f.subFields?.columns || []).map((col: any) => ({
+									name: col.name,
+									type: col.type || 'string',
+								}))
+								: undefined,
 						}));
 
 						responseData = await conDocApiSimpleOcrUpload.call(this, i, projectName, schemaFields);
@@ -184,7 +191,9 @@ export class ConDoc implements INodeType {
 						if (waitForResult && responseData?.jobId) {
 							const pollInterval = this.getNodeParameter('pollInterval', i, 3) as number;
 							const maxWaitTime = this.getNodeParameter('maxWaitTime', i, 300) as number;
-							responseData = await pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+							const pollResult = await pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+							// Extract only documents array for cleaner output
+							responseData = pollResult?.results?.data?.documents || pollResult;
 						}
 					}
 				}

@@ -74,6 +74,7 @@ class ConDoc {
             version: 1,
             subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
             description: 'Interact with the ConDoc OCR External API',
+            usableAsTool: true,
             defaults: {
                 name: 'ConDoc',
             },

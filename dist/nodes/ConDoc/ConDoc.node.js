@@ -186,11 +186,8 @@ class ConDoc {
                     if (operation === 'upload') {
                         const projectId = this.getNodeParameter('projectId', i);
                         responseData = await GenericFunctions_1.conDocApiFileUpload.call(this, i, projectId || undefined);
-                        const waitForResult = this.getNodeParameter('waitForResult', i, true);
-                        if (waitForResult && (responseData === null || responseData === void 0 ? void 0 : responseData.jobId)) {
-                            const pollInterval = this.getNodeParameter('pollInterval', i, 3);
-                            const maxWaitTime = this.getNodeParameter('maxWaitTime', i, 300);
-                            responseData = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+                        if (responseData === null || responseData === void 0 ? void 0 : responseData.jobId) {
+                            responseData = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, 3, 300);
                         }
                     }
                     else if (operation === 'getJobStatus') {

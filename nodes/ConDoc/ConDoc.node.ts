@@ -208,11 +208,8 @@ export class ConDoc implements INodeType {
 							projectId || undefined,
 						);
 
-						const waitForResult = this.getNodeParameter('waitForResult', i, true) as boolean;
-						if (waitForResult && responseData?.jobId) {
-							const pollInterval = this.getNodeParameter('pollInterval', i, 3) as number;
-							const maxWaitTime = this.getNodeParameter('maxWaitTime', i, 300) as number;
-							responseData = await pollForOcrResult.call(this, responseData.jobId, pollInterval, maxWaitTime);
+						if (responseData?.jobId) {
+							responseData = await pollForOcrResult.call(this, responseData.jobId, 3, 300);
 						}
 					} else if (operation === 'getJobStatus') {
 						const jobId = this.getNodeParameter('jobId', i) as string;

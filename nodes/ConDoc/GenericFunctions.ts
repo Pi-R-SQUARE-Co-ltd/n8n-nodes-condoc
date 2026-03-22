@@ -205,7 +205,7 @@ export async function conDocApiSimpleOcrUpload(
 			const msg = responseData?.message;
 			if (typeof msg === 'string' && msg.toLowerCase().includes('insufficient')) {
 				throw new NodeApiError(this.getNode(), responseData as any, {
-					message: `เครดิตไม่เพียงพอ (Insufficient credits) — ต้องการ ${responseData.required || '?'} เครดิต แต่เหลือ ${responseData.available || '?'} เครดิต กรุณาเติมเครดิตก่อนใช้งาน`,
+					message: 'เครดิตไม่เพียงพอ (Insufficient credits)',
 				});
 			}
 			const errorMsg = typeof msg === 'string' ? msg

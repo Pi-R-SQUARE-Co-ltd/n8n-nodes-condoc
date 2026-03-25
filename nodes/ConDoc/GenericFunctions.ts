@@ -167,12 +167,12 @@ export async function pollForOcrResult(
 }
 
 /**
- * Upload file to Simple OCR endpoint with project name + schema fields.
+ * Upload file to Simple OCR endpoint with schema fields.
+ * Returns OCR result synchronously (API waits for processing to complete).
  */
 export async function conDocApiSimpleOcrUpload(
 	this: IExecuteFunctions,
 	itemIndex: number,
-	projectName: string,
 	schemaFields: Array<{ name: string; description?: string }>,
 ): Promise<any> {
 	const credentials = await this.getCredentials('conDocApi');
@@ -184,42 +184,19 @@ export async function conDocApiSimpleOcrUpload(
 
 	const formData = new FormData();
 	formData.append('file', new Blob([buffer], { type: binaryData.mimeType }), binaryData.fileName || 'upload');
-	formData.append('projectName', projectName);
+	formData.append('schemaFields', JSON.stringify(schemaFields));
 
-	if (schemaFields.length > 0) {
-		formData.append('schemaFields', JSON.stringify(schemaFields));
-	}
-
-	let response: any;
-	try {
-		response = await this.helpers.httpRequest({
-			method: 'POST',
-			url: `${baseUrl}/api/v1/external/simple-ocr`,
-			headers: { 'X-API-Key': credentials.apiKey as string },
-			body: formData,
-		});
-	} catch (error: any) {
-		// Extract meaningful error message from API response
-		const responseData = error?.response?.data || error?.body;
-		if (responseData) {
-			const msg = responseData?.message;
-			if (typeof msg === 'string' && msg.toLowerCase().includes('insufficient')) {
-				throw new NodeApiError(this.getNode(), responseData as any, {
-					message: 'เครดิตไม่เพียงพอ (Insufficient credits)',
-				});
-			}
-			const errorMsg = typeof msg === 'string' ? msg
-				: responseData?.error?.message || responseData?.error || JSON.stringify(responseData);
-			throw new NodeApiError(this.getNode(), responseData as any, {
-				message: `Simple OCR failed: ${errorMsg}`,
-			});
-		}
-		throw error;
-	}
+	const response = await this.helpers.httpRequest({
+		method: 'POST',
+		url: `${baseUrl}/api/v1/external/simple-ocr`,
+		headers: { 'X-API-Key': credentials.apiKey as string },
+		body: formData,
+		timeout: 180000, // 3 minutes — API processes synchronously
+	});
 
 	if (response && response.success === false) {
 		throw new NodeApiError(this.getNode(), response as any, {
-			message: response.error?.message || 'Simple OCR upload failed',
+			message: response.error?.message || 'Simple OCR failed',
 		});
 	}
 

@@ -7,7 +7,7 @@ import {
 	INodeTypeDescription,
 } from 'n8n-workflow';
 
-import { conDocApiRequest, conDocApiFileUpload, pollForOcrResult, conDocApiSimpleOcrUpload, getProjects, getDocuments } from './GenericFunctions';
+import { conDocApiRequest, conDocApiFileUpload, conDocApiSimpleOcrUpload, getProjects, getDocuments } from './GenericFunctions';
 
 import { ocrOperations, ocrFields } from './descriptions/OcrDescription';
 import { documentOperations, documentFields } from './descriptions/DocumentDescription';
@@ -88,7 +88,6 @@ export class ConDoc implements INodeType {
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: 'Interact with the ConDoc OCR External API',
-		usableAsTool: true,
 		defaults: {
 			name: 'ConDoc',
 		},
@@ -168,49 +167,28 @@ export class ConDoc implements INodeType {
 
 				// ─── Simple OCR ───
 				if (resource === 'simpleOcr') {
-					if (operation === 'process') {
-						const projectName = this.getNodeParameter('projectName', i) as string;
-						const schemaFieldsRaw = this.getNodeParameter('schemaFields', i) as any;
-						const fields = schemaFieldsRaw?.fields || [];
+					const schemaFieldsRaw = this.getNodeParameter('schemaFields', i) as any;
+					const fields = schemaFieldsRaw?.fields || [];
 
-						// Convert to API format (fieldName → name, include fieldType + subFields)
-						const schemaFields = fields.map((f: any) => ({
-							name: f.fieldName,
-							fieldType: f.fieldType || 'string',
-							description: f.description || undefined,
-							subFields: f.fieldType === 'array'
-								? (f.subFields?.columns || []).map((col: any) => ({
-									name: col.name,
-									description: col.description || undefined,
-								}))
-								: undefined,
-						}));
+					const schemaFields = fields.map((f: any) => ({
+						name: f.fieldName,
+						description: f.description || undefined,
+					}));
 
-						responseData = await conDocApiSimpleOcrUpload.call(this, i, projectName, schemaFields);
-
-						const waitForResult = this.getNodeParameter('waitForResult', i, true) as boolean;
-						if (waitForResult && responseData?.jobId) {
-							const pollResult = await pollForOcrResult.call(this, responseData.jobId, 3, 300);
-							// Extract only ocrData from first document for clean output
-							const docs = pollResult?.results?.data?.documents;
-							responseData = docs?.[0]?.ocrData || pollResult;
-						}
-					}
+					// API processes synchronously and returns result directly
+					responseData = await conDocApiSimpleOcrUpload.call(this, i, schemaFields);
 				}
 
 				// ─── OCR ───
 				else if (resource === 'ocr') {
 					if (operation === 'upload') {
 						const projectId = this.getNodeParameter('projectId', i) as string;
+						// Returns jobId immediately — use Get Job Status to poll
 						responseData = await conDocApiFileUpload.call(
 							this,
 							i,
 							projectId || undefined,
 						);
-
-						if (responseData?.jobId) {
-							responseData = await pollForOcrResult.call(this, responseData.jobId, 3, 300);
-						}
 					} else if (operation === 'getJobStatus') {
 						const jobId = this.getNodeParameter('jobId', i) as string;
 						responseData = await conDocApiRequest.call(this, 'GET', `/ocr/${jobId}`);

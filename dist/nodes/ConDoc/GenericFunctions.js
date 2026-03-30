@@ -125,10 +125,11 @@ async function pollForOcrResult(jobId, pollIntervalSeconds, maxWaitTimeSeconds) 
     });
 }
 /**
- * Upload file to Simple OCR endpoint with project name + schema fields.
+ * Upload file to Simple OCR endpoint with schema fields.
+ * Returns OCR result synchronously (API waits for processing to complete).
  */
-async function conDocApiSimpleOcrUpload(itemIndex, projectName, schemaFields) {
-    var _a, _b, _c;
+async function conDocApiSimpleOcrUpload(itemIndex, schemaFields) {
+    var _a;
     const credentials = await this.getCredentials('conDocApi');
     const baseUrl = credentials.baseUrl.replace(/\/$/, '');
     const binaryPropertyName = this.getNodeParameter('binaryPropertyName', itemIndex);
@@ -136,40 +137,17 @@ async function conDocApiSimpleOcrUpload(itemIndex, projectName, schemaFields) {
     const buffer = await this.helpers.getBinaryDataBuffer(itemIndex, binaryPropertyName);
     const formData = new FormData();
     formData.append('file', new Blob([buffer], { type: binaryData.mimeType }), binaryData.fileName || 'upload');
-    formData.append('projectName', projectName);
-    if (schemaFields.length > 0) {
-        formData.append('schemaFields', JSON.stringify(schemaFields));
-    }
-    let response;
-    try {
-        response = await this.helpers.httpRequest({
-            method: 'POST',
-            url: `${baseUrl}/api/v1/external/simple-ocr`,
-            headers: { 'X-API-Key': credentials.apiKey },
-            body: formData,
-        });
-    }
-    catch (error) {
-        // Extract meaningful error message from API response
-        const responseData = ((_a = error === null || error === void 0 ? void 0 : error.response) === null || _a === void 0 ? void 0 : _a.data) || (error === null || error === void 0 ? void 0 : error.body);
-        if (responseData) {
-            const msg = responseData === null || responseData === void 0 ? void 0 : responseData.message;
-            if (typeof msg === 'string' && msg.toLowerCase().includes('insufficient')) {
-                throw new n8n_workflow_1.NodeApiError(this.getNode(), responseData, {
-                    message: 'เครดิตไม่เพียงพอ (Insufficient credits)',
-                });
-            }
-            const errorMsg = typeof msg === 'string' ? msg
-                : ((_b = responseData === null || responseData === void 0 ? void 0 : responseData.error) === null || _b === void 0 ? void 0 : _b.message) || (responseData === null || responseData === void 0 ? void 0 : responseData.error) || JSON.stringify(responseData);
-            throw new n8n_workflow_1.NodeApiError(this.getNode(), responseData, {
-                message: `Simple OCR failed: ${errorMsg}`,
-            });
-        }
-        throw error;
-    }
+    formData.append('schemaFields', JSON.stringify(schemaFields));
+    const response = await this.helpers.httpRequest({
+        method: 'POST',
+        url: `${baseUrl}/api/v1/external/simple-ocr`,
+        headers: { 'X-API-Key': credentials.apiKey },
+        body: formData,
+        timeout: 180000, // 3 minutes — API processes synchronously
+    });
     if (response && response.success === false) {
         throw new n8n_workflow_1.NodeApiError(this.getNode(), response, {
-            message: ((_c = response.error) === null || _c === void 0 ? void 0 : _c.message) || 'Simple OCR upload failed',
+            message: ((_a = response.error) === null || _a === void 0 ? void 0 : _a.message) || 'Simple OCR failed',
         });
     }
     return (response === null || response === void 0 ? void 0 : response.data) !== undefined ? response.data : response;

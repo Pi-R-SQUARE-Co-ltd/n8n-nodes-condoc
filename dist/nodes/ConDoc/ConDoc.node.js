@@ -74,7 +74,6 @@ class ConDoc {
             version: 1,
             subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
             description: 'Interact with the ConDoc OCR External API',
-            usableAsTool: true,
             defaults: {
                 name: 'ConDoc',
             },
@@ -142,7 +141,6 @@ class ConDoc {
         };
     }
     async execute() {
-        var _a, _b, _c;
         const items = this.getInputData();
         const returnData = [];
         const resource = this.getNodeParameter('resource', 0);
@@ -152,47 +150,41 @@ class ConDoc {
                 let responseData;
                 // ─── Simple OCR ───
                 if (resource === 'simpleOcr') {
-                    if (operation === 'process') {
-                        const projectName = this.getNodeParameter('projectName', i);
-                        const schemaFieldsRaw = this.getNodeParameter('schemaFields', i);
-                        const fields = (schemaFieldsRaw === null || schemaFieldsRaw === void 0 ? void 0 : schemaFieldsRaw.fields) || [];
-                        // Convert to API format (fieldName → name, include fieldType + subFields)
-                        const schemaFields = fields.map((f) => {
-                            var _a;
-                            return ({
-                                name: f.fieldName,
-                                fieldType: f.fieldType || 'string',
-                                description: f.description || undefined,
-                                subFields: f.fieldType === 'array'
-                                    ? (((_a = f.subFields) === null || _a === void 0 ? void 0 : _a.columns) || []).map((col) => ({
-                                        name: col.name,
-                                        description: col.description || undefined,
-                                    }))
-                                    : undefined,
-                            });
+                    const schemaFieldsRaw = this.getNodeParameter('schemaFields', i);
+                    const fields = (schemaFieldsRaw === null || schemaFieldsRaw === void 0 ? void 0 : schemaFieldsRaw.fields) || [];
+                    const schemaFields = fields.map((f) => {
+                        var _a;
+                        return ({
+                            name: f.fieldName,
+                            fieldType: f.fieldType || 'string',
+                            description: f.description || undefined,
+                            subFields: f.fieldType === 'array' ? (((_a = f.subFields) === null || _a === void 0 ? void 0 : _a.columns) || []) : undefined,
                         });
-                        responseData = await GenericFunctions_1.conDocApiSimpleOcrUpload.call(this, i, projectName, schemaFields);
-                        const waitForResult = this.getNodeParameter('waitForResult', i, true);
-                        if (waitForResult && (responseData === null || responseData === void 0 ? void 0 : responseData.jobId)) {
-                            const pollResult = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, 3, 300);
-                            // Extract only ocrData from first document for clean output
-                            const docs = (_b = (_a = pollResult === null || pollResult === void 0 ? void 0 : pollResult.results) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.documents;
-                            responseData = ((_c = docs === null || docs === void 0 ? void 0 : docs[0]) === null || _c === void 0 ? void 0 : _c.ocrData) || pollResult;
-                        }
-                    }
+                    });
+                    // API processes synchronously and returns result directly
+                    responseData = await GenericFunctions_1.conDocApiSimpleOcrUpload.call(this, i, schemaFields);
                 }
                 // ─── OCR ───
                 else if (resource === 'ocr') {
                     if (operation === 'upload') {
                         const projectId = this.getNodeParameter('projectId', i);
+                        // Returns jobId immediately — use Get Job Status to poll
                         responseData = await GenericFunctions_1.conDocApiFileUpload.call(this, i, projectId || undefined);
-                        if (responseData === null || responseData === void 0 ? void 0 : responseData.jobId) {
-                            responseData = await GenericFunctions_1.pollForOcrResult.call(this, responseData.jobId, 3, 300);
-                        }
                     }
                     else if (operation === 'getJobStatus') {
                         const jobId = this.getNodeParameter('jobId', i);
                         responseData = await GenericFunctions_1.conDocApiRequest.call(this, 'GET', `/ocr/${jobId}`);
+                    }
+                    else if (operation === 'getBatchStatus') {
+                        const jobIdsRaw = this.getNodeParameter('jobIds', i);
+                        let jobIds;
+                        try {
+                            jobIds = JSON.parse(jobIdsRaw);
+                        }
+                        catch {
+                            jobIds = jobIdsRaw.split(',').map((id) => id.trim()).filter(Boolean);
+                        }
+                        responseData = await GenericFunctions_1.conDocApiRequest.call(this, 'POST', '/ocr/batch-status', { jobIds });
                     }
                 }
                 // ─── Document ───

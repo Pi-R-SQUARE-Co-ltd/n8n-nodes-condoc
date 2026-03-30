@@ -172,7 +172,9 @@ export class ConDoc implements INodeType {
 
 					const schemaFields = fields.map((f: any) => ({
 						name: f.fieldName,
+						fieldType: f.fieldType || 'string',
 						description: f.description || undefined,
+						subFields: f.fieldType === 'array' ? (f.subFields?.columns || []) : undefined,
 					}));
 
 					// API processes synchronously and returns result directly
@@ -192,6 +194,15 @@ export class ConDoc implements INodeType {
 					} else if (operation === 'getJobStatus') {
 						const jobId = this.getNodeParameter('jobId', i) as string;
 						responseData = await conDocApiRequest.call(this, 'GET', `/ocr/${jobId}`);
+					} else if (operation === 'getBatchStatus') {
+						const jobIdsRaw = this.getNodeParameter('jobIds', i) as string;
+						let jobIds: string[];
+						try {
+							jobIds = JSON.parse(jobIdsRaw);
+						} catch {
+							jobIds = jobIdsRaw.split(',').map((id: string) => id.trim()).filter(Boolean);
+						}
+						responseData = await conDocApiRequest.call(this, 'POST', '/ocr/batch-status', { jobIds });
 					}
 				}
 

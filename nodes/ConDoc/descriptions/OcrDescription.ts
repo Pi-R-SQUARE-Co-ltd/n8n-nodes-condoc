@@ -22,6 +22,12 @@ export const ocrOperations: INodeProperties[] = [
 				description: 'Get the status and results of an OCR job',
 				action: 'Get OCR job status',
 			},
+			{
+				name: 'Get Multiple Job Status',
+				value: 'getBatchStatus',
+				description: 'Get status of multiple OCR jobs in a single request',
+				action: 'Get multiple OCR job status',
+			},
 		],
 		default: 'upload',
 	},
@@ -62,5 +68,17 @@ export const ocrFields: INodeProperties[] = [
 			show: { resource: ['ocr'], operation: ['getJobStatus'] },
 		},
 		description: 'The OCR job ID to check',
+	},
+	// --- Get Multiple Job Status ---
+	{
+		displayName: 'Job IDs',
+		name: 'jobIds',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: { resource: ['ocr'], operation: ['getBatchStatus'] },
+		},
+		description: 'Comma-separated OCR job IDs or an expression returning an array (max 100)',
 	},
 ];

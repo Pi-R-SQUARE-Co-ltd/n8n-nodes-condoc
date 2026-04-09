@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-condoc",
-  "version": "0.3.13",
+  "version": "0.3.14",
   "description": "n8n community node for ConDoc — a multi-tenant document processing and OCR platform. Automate document uploads, OCR extraction, project management, and more with 21 API operations.",
   "keywords": [
     "n8n-community-node-package",
@@ -33,7 +33,7 @@
     ]
   },
   "scripts": {
-    "build": "tsc && copyfiles \"nodes/**/*.json\" \"nodes/**/*.png\" dist/",
+    "build": "tsc && copyfiles \"nodes/**/*.json\" \"nodes/**/*.png\" \"credentials/**/*.png\" dist/",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "type-check": "tsc --noEmit"

@@ -9,7 +9,7 @@ export class ConDocApi implements ICredentialType {
 	name = 'conDocApi';
 	displayName = 'ConDoc API';
 	documentationUrl = 'https://docs.condoc.ai';
-	icon = 'file:condoc.png' as const;
+	iconUrl = 'https://raw.githubusercontent.com/Pi-R-SQUARE-Co-ltd/n8n-nodes-condoc/main/nodes/ConDoc/condoc.png';
 
 	properties: INodeProperties[] = [
 		{

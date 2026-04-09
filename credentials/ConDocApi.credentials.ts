@@ -9,16 +9,14 @@ export class ConDocApi implements ICredentialType {
 	name = 'conDocApi';
 	displayName = 'ConDoc API';
 	documentationUrl = 'https://docs.condoc.ai';
+	icon = 'file:condoc.png' as const;
 
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Base URL',
 			name: 'baseUrl',
-			type: 'string',
+			type: 'hidden',
 			default: 'https://api.condoc.ai',
-			placeholder: 'https://api.condoc.ai',
-			description: 'The base URL of your ConDoc instance (without trailing slash)',
-			required: true,
 		},
 		{
 			displayName: 'API Key',

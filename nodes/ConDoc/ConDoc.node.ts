@@ -5,6 +5,7 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
+	NodeConnectionTypes,
 } from 'n8n-workflow';
 
 import { conDocApiRequest, conDocApiFileUpload, conDocApiSimpleOcrUpload, getProjects, getDocuments } from './GenericFunctions';
@@ -91,8 +92,8 @@ export class ConDoc implements INodeType {
 		defaults: {
 			name: 'ConDoc',
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
 				name: 'conDocApi',
@@ -107,16 +108,16 @@ export class ConDoc implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
-					{ name: 'Simple OCR', value: 'simpleOcr' },
-				{ name: 'OCR', value: 'ocr' },
-					{ name: 'Document', value: 'document' },
 					{ name: 'Credit', value: 'credit' },
-					{ name: 'Usage', value: 'usage' },
+					{ name: 'Document', value: 'document' },
+					{ name: 'OCR', value: 'ocr' },
 					{ name: 'Project', value: 'project' },
-					{ name: 'Project Settings', value: 'projectSettings' },
 					{ name: 'Project Definition', value: 'projectDefinition' },
-					{ name: 'Project Fixed Data', value: 'projectFixedData' },
 					{ name: 'Project Field Mapping', value: 'projectFieldMapping' },
+					{ name: 'Project Fixed Data', value: 'projectFixedData' },
+					{ name: 'Project Settings', value: 'projectSettings' },
+					{ name: 'Simple OCR', value: 'simpleOcr' },
+					{ name: 'Usage', value: 'usage' },
 				],
 				default: 'ocr',
 			},

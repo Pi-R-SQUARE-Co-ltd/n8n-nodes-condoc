@@ -16,7 +16,7 @@ export class ConDocApi implements ICredentialType {
 			displayName: 'Base URL',
 			name: 'baseUrl',
 			type: 'hidden',
-			default: 'https://api.condoc.ai',
+			default: 'https://n8n.condoc.ai',
 		},
 		{
 			displayName: 'API Key',

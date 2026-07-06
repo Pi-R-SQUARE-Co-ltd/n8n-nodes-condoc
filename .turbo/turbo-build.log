@@ -1,5 +1,0 @@
-
-
-> n8n-nodes-condoc@0.3.10 build /Users/kasinbadee/Pi R square/condoc-platform/packages/n8n-nodes-condoc
-> tsc && copyfiles "nodes/**/*.json" "nodes/**/*.png" dist/
-

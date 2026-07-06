@@ -6,15 +6,13 @@ class ConDocApi {
         this.name = 'conDocApi';
         this.displayName = 'ConDoc API';
         this.documentationUrl = 'https://docs.condoc.ai';
+        this.icon = 'file:condoc.png';
         this.properties = [
             {
                 displayName: 'Base URL',
                 name: 'baseUrl',
-                type: 'string',
-                default: 'https://api.condoc.ai',
-                placeholder: 'https://api.condoc.ai',
-                description: 'The base URL of your ConDoc instance (without trailing slash)',
-                required: true,
+                type: 'hidden',
+                default: 'https://n8n.condoc.ai',
             },
             {
                 displayName: 'API Key',

@@ -57,6 +57,17 @@ export const ocrFields: INodeProperties[] = [
 		},
 		description: 'Project ID (required if API key is workspace-scoped). Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
+	{
+		displayName: 'External ID',
+		name: 'externalId',
+		type: 'string',
+		default: '',
+		placeholder: '322ebaa0-c200-4f1c-a13c-1804c4d7dd03',
+		displayOptions: {
+			show: { resource: ['ocr'], operation: ['upload'] },
+		},
+		description: 'Optional caller-supplied ID (any string — e.g. a partner UUID) stored on the document. You can pass this value to "Get Job Status" / "Get Multiple Job Status" instead of the ConDoc jobId.',
+	},
 	// --- Get Job Status ---
 	{
 		displayName: 'Job ID',
@@ -64,10 +75,11 @@ export const ocrFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
+		placeholder: 'cmpp2fcsu023hc71l0omsb6pr',
 		displayOptions: {
 			show: { resource: ['ocr'], operation: ['getJobStatus'] },
 		},
-		description: 'The OCR job ID to check',
+		description: 'Either the ConDoc OCR jobId (cuid, e.g. "cm...") returned by Upload, or the externalId you passed at upload time.',
 	},
 	// --- Get Multiple Job Status ---
 	{
@@ -76,9 +88,10 @@ export const ocrFields: INodeProperties[] = [
 		type: 'string',
 		default: '',
 		required: true,
+		placeholder: 'cmpp2fcsu023hc71l0omsb6pr,322ebaa0-c200-4f1c-a13c-1804c4d7dd03',
 		displayOptions: {
 			show: { resource: ['ocr'], operation: ['getBatchStatus'] },
 		},
-		description: 'Comma-separated OCR job IDs or an expression returning an array (max 100)',
+		description: 'Either ConDoc jobIds (cuid, "cm...") or externalIds passed at upload time. Comma-separated or an expression returning an array (max 100).',
 	},
 ];

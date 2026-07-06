@@ -61,6 +61,50 @@ export async function getDocuments(
 }
 
 /**
+ * Transform a Simple OCR result into flat rows for the "Mapping" output mode.
+ * Explodes the single table/array field into one row per item, merging the
+ * top-level scalar fields (headers) into every row. Optionally renames keys.
+ *
+ * Accepts either the result object directly or the legacy `{ result: {...} }`
+ * envelope, so it works regardless of which API version answers.
+ */
+export function flattenOcrResult(
+	result: any,
+	renameRules: Array<{ from: string; to: string }> = [],
+): any[] {
+	const data =
+		result && typeof result === 'object' && result.result !== undefined
+			? result.result
+			: result;
+	if (!data || typeof data !== 'object') return [data];
+
+	const rename = (obj: Record<string, any>): Record<string, any> => {
+		if (!renameRules.length) return obj;
+		const out: Record<string, any> = {};
+		for (const [k, v] of Object.entries(obj)) {
+			const rule = renameRules.find((r) => r.from === k);
+			out[rule && rule.to ? rule.to : k] = v;
+		}
+		return out;
+	};
+
+	const headers: Record<string, any> = {};
+	let tableRows: any[] | null = null;
+	for (const [k, v] of Object.entries(data as Record<string, any>)) {
+		if (Array.isArray(v)) {
+			if (tableRows === null) tableRows = v; // first array field is the table
+		} else {
+			headers[k] = v;
+		}
+	}
+
+	if (!tableRows) return [rename(data as Record<string, any>)];
+	return tableRows.map((row) =>
+		rename({ ...headers, ...(row as Record<string, any>) }),
+	);
+}
+
+/**
  * Make an authenticated JSON request to the ConDoc External API.
  * Automatically unwraps the `{ success, data, error }` response envelope.
  */
@@ -107,6 +151,7 @@ export async function conDocApiFileUpload(
 	this: IExecuteFunctions,
 	itemIndex: number,
 	projectId?: string,
+	externalId?: string,
 ): Promise<any> {
 	const credentials = await this.getCredentials('conDocApi');
 	const baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
@@ -120,6 +165,9 @@ export async function conDocApiFileUpload(
 
 	if (projectId) {
 		formData.append('projectId', projectId);
+	}
+	if (externalId) {
+		formData.append('externalId', externalId);
 	}
 
 	const options: IHttpRequestOptions = {

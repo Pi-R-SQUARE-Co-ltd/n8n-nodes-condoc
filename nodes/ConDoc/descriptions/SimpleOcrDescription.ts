@@ -107,4 +107,59 @@ export const simpleOcrFields: INodeProperties[] = [
 		displayOptions: { show: { resource: ['simpleOcr'] } },
 		description: 'Name of the binary property containing the file (single file, single page only)',
 	},
+	// Output Mode — raw result, or flattened table rows ("Mapping")
+	{
+		displayName: 'Output Mode',
+		name: 'outputMode',
+		type: 'options',
+		default: 'raw',
+		displayOptions: { show: { resource: ['simpleOcr'] } },
+		options: [
+			{
+				name: 'Raw',
+				value: 'raw',
+				description: 'Return the OCR result as-is',
+			},
+			{
+				name: 'Mapping',
+				value: 'mapping',
+				description:
+					'Flatten the table into one item per row and merge the header fields into every row',
+			},
+		],
+	},
+	// Optional key renaming, only for Mapping mode (e.g. Items -> item)
+	{
+		displayName: 'Rename Fields',
+		name: 'renameFields',
+		type: 'fixedCollection',
+		typeOptions: { multipleValues: true },
+		default: {},
+		displayOptions: {
+			show: { resource: ['simpleOcr'], outputMode: ['mapping'] },
+		},
+		description: 'Optionally rename output keys, e.g. Items to item, Price to price',
+		options: [
+			{
+				displayName: 'Rule',
+				name: 'rules',
+				values: [
+					{
+						displayName: 'From',
+						name: 'from',
+						type: 'string',
+						default: '',
+						description: 'Original field name',
+					},
+					{
+						displayName: 'To',
+						name: 'to',
+						type: 'string',
+						default: '',
+						description: 'New field name',
+					},
+				],
+			},
+		],
+	},
 ];

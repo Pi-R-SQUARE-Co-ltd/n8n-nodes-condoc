@@ -23,12 +23,6 @@ exports.documentOperations = [
                 description: 'Get a document with OCR results',
                 action: 'Get a document',
             },
-            {
-                name: 'Delete',
-                value: 'delete',
-                description: 'Delete a document (soft delete)',
-                action: 'Delete a document',
-            },
         ],
         default: 'list',
     },
@@ -79,19 +73,6 @@ exports.documentFields = [
         displayOptions: {
             show: { resource: ['document'], operation: ['get'] },
         },
-        description: 'เลือกเอกสาร หรือระบุ ID ด้วย <a href="https://docs.n8n.io/code/expressions/">expression</a>',
-    },
-    // --- Delete ---
-    {
-        displayName: 'Document Name or ID',
-        name: 'documentId',
-        type: 'options',
-        typeOptions: { loadOptionsMethod: 'getDocuments' },
-        default: '',
-        required: true,
-        displayOptions: {
-            show: { resource: ['document'], operation: ['delete'] },
-        },
-        description: 'เลือกเอกสารที่ต้องการลบ หรือระบุ ID ด้วย <a href="https://docs.n8n.io/code/expressions/">expression</a>',
+        description: 'The document to retrieve. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
     },
 ];

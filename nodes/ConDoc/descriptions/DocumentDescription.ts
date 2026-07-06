@@ -22,12 +22,6 @@ export const documentOperations: INodeProperties[] = [
 				description: 'Get a document with OCR results',
 				action: 'Get a document',
 			},
-			{
-				name: 'Delete',
-				value: 'delete',
-				description: 'Delete a document (soft delete)',
-				action: 'Delete a document',
-			},
 		],
 		default: 'list',
 	},
@@ -80,18 +74,5 @@ export const documentFields: INodeProperties[] = [
 			show: { resource: ['document'], operation: ['get'] },
 		},
 		description: 'The document to retrieve. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
-	},
-	// --- Delete ---
-	{
-		displayName: 'Document Name or ID',
-		name: 'documentId',
-		type: 'options',
-		typeOptions: { loadOptionsMethod: 'getDocuments' },
-		default: '',
-		required: true,
-		displayOptions: {
-			show: { resource: ['document'], operation: ['delete'] },
-		},
-		description: 'The document to delete. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 ];

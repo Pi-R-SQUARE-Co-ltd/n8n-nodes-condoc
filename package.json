@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-condoc",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "n8n community node for ConDoc — a multi-tenant document processing and OCR platform. Automate OCR extraction, simple OCR with field mapping, and document management.",
   "keywords": [
     "n8n-community-node-package",
@@ -51,6 +51,6 @@
     "typescript": "^5.3.0"
   },
   "peerDependencies": {
-    "n8n-workflow": ">=1.0.0"
+    "n8n-workflow": "*"
   }
 }
